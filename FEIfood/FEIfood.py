@@ -1,4 +1,5 @@
 import os
+import sys
 
 #aspecto visual do início do projeto
 nome_projeto = "FEIfood"
@@ -63,9 +64,7 @@ while True:
         opcao = int(input("Digite sua opção: "))
     except ValueError:
         error_msg = "opção inválida! Digite as opções do menu (1, 2 ou 3)."
-        print("=" * len(error_msg))
         print(error_msg)
-        print("=" * len(error_msg))
         continue
     if opcao == 1:
         
