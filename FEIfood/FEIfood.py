@@ -1,5 +1,4 @@
 import os
-import sys
 
 #aspecto visual do início do projeto
 nome_projeto = "FEIfood"
@@ -11,6 +10,8 @@ print("Seja bem vindo(a) ao FEIfood! É um prazer ter você conosco.")
 print()
 
 nome_arquivo = "FEIfood.txt"
+
+nome_arquivo2 = "restaurantes.txt"
 
 #criação do meu arquivo que funcionará como banco de dados
 if not os.path.exists(nome_arquivo):
@@ -33,7 +34,7 @@ def verifica_login(usuario_digitado, senha_digitada):
         with open(nome_arquivo, 'r', encoding="utf-8") as arquivo:       #abre o arquivo em modo leitura ('r')
             contador = 0
             for linha in arquivo:
-                if contador < 4:       #pula as 4 primeiras linhas, pois lá está o nosso cabeçalho
+                if contador < 2:       #pula as 2 primeiras linhas, pois lá está o nosso cabeçalho
                     contador += 1
                     continue
                 linha_limpa = linha.strip()        # Remove espaços em branco e quebras de linha no início e fim da linha
@@ -52,7 +53,48 @@ def verifica_login(usuario_digitado, senha_digitada):
     except FileNotFoundError:
         print("Faça seu cadastro para que possa realizar o login")
         return False
+    
+def buscar_alimento(nome_alimento, arquivo = nome_arquivo2):
 
+    encontrados = []
+    try:
+        with open (arquivo, 'r', encoding= "utf-8") as f:
+            for linha in f:
+                dados = linha.strip().split("|")
+                if len(dados) >= 3 and nome_alimento.lower() in dados[1].lower():
+                     nome = dados[1]
+                     preco = dados[2]
+                     encontrados.append((nome, preco))
+    except FileNotFoundError:
+        print("Arquivo de alimentos não encontrado.")
+    return encontrados
+
+def listar_alimentos(alimentos):
+    if not alimentos:
+        print("Nenhum alimento encontrado.")
+    else: 
+        print("\n Alimentos encontrados: ")
+        for alimento in alimentos:
+            print(f"- {nome} | Preço: R$ {preco}")
+    
+def menu_usuario (usuario):
+    while True:
+        print("O que deseja fazer hoje? ")
+        print("[1] Buscar alimento")
+        print("[2] Fazer pedido")
+        print("[3] Avaliar pedido")
+        print("[4] Sair")
+
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == 1:
+            nome = input("Digite o nome do alimento: ")
+            resultados = buscar_alimento(nome)
+            listar_alimentos(resultados)
+        elif opcao ==2:
+            itens = input("Digite os alimentos separdos por vírgula: ").split("|")
+            cadastrar_pedido(usuario, itens)
+            print("Pedido cadastrado!")
 while True:
 
     #menu
@@ -73,6 +115,7 @@ while True:
 
         if verifica_login(usuario_login,senha_login):
             print(f"Login bem sucedido! Que bom te ver novamente {usuario_login}.")
+            menu_usuario(usuario_login)
             break
         else:
             print("Nome de usuário ou senha incorretos. Tente novamente.")
