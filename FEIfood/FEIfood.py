@@ -9,9 +9,12 @@ print(cabecalho)
 print("Seja bem vindo(a) ao FEIfood! É um prazer ter você conosco.")
 print()
 
+#arquivos utilizados no projeto 
 nome_arquivo = "FEIfood.txt"
 arquivo_alimentos = "alimentos.txt"
 arquivo_pedidos = "pedidos.txt"
+
+
 #criação do meu arquivo que funcionará como banco de dados
 if not os.path.exists(nome_arquivo):
     arquivo_cadastro = open(nome_arquivo, 'w+t' , encoding="utf-8")      #cria o arquivo
@@ -109,82 +112,90 @@ def criar_pedidos(nome_usuario):
         id_pedido = gerar_id()
         itens = []
         avaliacao = "-"
-        
-        linha_pedido = f"{id_pedido}|{nome_usuario}|{",".join(itens)}|{avaliacao}\n"
+        formatacao = ",".join(itens)
+        linha_pedido = f"{id_pedido}|{nome_usuario}|{formatacao}|{avaliacao}\n"
         arquivo_p.write(linha_pedido)
         return id_pedido
+
+def carregar_pedidos():
+    try:
+        with open("pedidos.txt", 'r') as arquivo:
+            return arquivo.readlines()
+    except FileNotFoundError:
+        return []
     
+def salvar_pedidos(pedidos):
+    with open("pedidos.txt", "w") as arquivo:
+        arquivo.writelines(pedidos)
+
+def validar_codigo(codigo):
+    return buscar_por_codigo(codigo) is not None
+
+def exibir_pedido_formatado(linha):
+    id_pedido, usuario, alimento, avaliacao = linha.strip().split("|")
+    print("\nPedido Encontrado:")
+    print(f"- ID do Pedido: {id_pedido}")
+    print(f"- Usuário: {usuario}")
+    print("- Carrinho atual:")
+    for item in alimento.split(","):
+        print(f"  •  {item}")
+    print(f"- Avaliação: {avaliacao}")
+    print("-" * 40)
+
 def atualizar_pedido():
-    """
-    Atualiza os itens dentro de um pedido
-    """
     print("Atualizar pedido:")
     id_atualizar = int(input("Digite o ID do pedido que deseja atualizar: "))
-    # Abre o arquivo pedidos.txt para leitura
-    arquivo_pedidos = open("pedidos.txt", "r")
-    # Lê o conteúdo do arquivo
-    conteudo = arquivo_pedidos.readlines()
-    # Fecha o arquivo
-    arquivo_pedidos.close()
-    # Procura o contato no arquivo
-    for i, linha in enumerate(conteudo): # Para cada indice e linha no conteúdo do arquivo 
-        id_pedido, usuario, alimento, avaliacao = linha.strip().split("|") # Divide a linha em partes, separando por vírgula
-        if id_atualizar == id_pedido: # Verifica se o id procurado é igual ao id_pedido
-            print(f"Pedido encontrado: {linha.strip()}") # Imprime os dados do pedido encontrado
-            # Atualiza os dados do pedido
-            novo_alimento = input("Digite o novo item que deseja adicionar ao carrinho: ")
-            # Atualiza os dados do pedido, se o usuário não deixar o nome em branco
-            if alimento:
-                lista = alimento.split(",") if alimento else []
-                lista.append(novo_alimento)
-                alimento_atualizado = ",".join(lista)
-                conteudo[i] = f"{id_pedido}|{usuario}|{alimento_atualizado}|{avaliacao}\n"
-            else:
-                conteudo[i] = f"{id_pedido}|{usuario}|{alimento}|{avaliacao}\n"
-            break # Sai do loop se o pedido for encontrado
-    else: # Se não encontrar o pedido
-        print("Pedido não encontrado.") # Mensagem de erro se o pedido não for encontrado
-        
-    # Abre o arquivo pedidos.txt para escrita
-    with open("pedidos.txt", "w") as arquivo_p:
-    # Grava os alimentos atualizados no arquivo
-        for linha in conteudo: # Para cada linha no conteúdo do arquivo
-            arquivo_p.write(linha) # Grava a linha no arquivo pedidos.txt
-    print("Pedido atualizado com sucesso!") # Mensagem de sucesso
+    pedidos = carregar_pedidos()
 
+    # Procura o pedido no arquivo
+    for i, linha in enumerate(pedidos): # Para cada índice e linha no conteúdo do arquivo 
+        id_pedido, usuario, alimento, avaliacao = linha.strip().split("|") # Divide a linha em partes, separando pelo separador 
+        if id_atualizar == int(id_pedido): # Verifica se o id procurado é igual ao id_pedido
+            # Imprime os dados do pedido encontrado
+            exibir_pedido_formatado(linha)
+
+            # Atualiza os dados do pedido
+            lista = alimento.split(",") if alimento else []
+
+            while True: # Permite adicionar múltiplos itens até digitar 0
+                codigo = input("Digite o novo item que deseja adicionar ao carrinho (ou 0 para finalizar): ")
+                if codigo == "0":
+                    break
+
+                novo_alimento = buscar_por_codigo(codigo) # Busca o nome do alimento pelo código
+
+                if not novo_alimento:
+                    print("Código não encontrado no cardápio.") # Mensagem de erro se o código não existir
+                else:
+                    lista.append(novo_alimento) # Adiciona o novo alimento à lista
+                    print(f"- {novo_alimento} adicionado ao carrinho.") # Confirmação de adição
+
+            alimento_atualizado = ",".join(lista) # Junta os itens em uma única string
+            pedidos[i] = f"{id_pedido}|{usuario}|{alimento_atualizado}|{avaliacao}\n" # Atualiza a linha do pedido
+            salvar_pedidos() 
+
+            print("\n Pedido atualizado com sucesso:")
+            exibir_pedido_formatado(pedidos[i])
+            return
+    # Se não encontrar o pedido
+        print("Pedido não encontrado.") # Mensagem de erro se o pedido não for encontrado
+    
 
 def excluir_pedido():
-    """
-    Apaga um pedido.
-    :return: None
-    """
     id_apagar = int(input("Digite o ID do pedido que deseja apagar: "))
-    # Abre o arquivo pedidos.txt para leitura
-    with open("pedidos.txt", "r") as arquivo_pedidos:
-    # Lê o conteúdo do arquivo
-        conteudo = arquivo_pedidos.readlines()
-
-        pedido_encontrado = False 
+    pedidos = carregar_pedidos()
         # Procura o pedido no arquivo
-        for i, linha in enumerate(conteudo):
-            id_pedido, usuario, alimento, avaliacao = linha.strip().split("|")
-            if id_apagar == int(id_pedido):
-                print(f"Pedido encontrado: {linha.strip()}")
-                # Remove o pedido da lista
-                conteudo.pop(i)
-                pedido_encontrado = True
-                break
-        else: # Se não encontrar o pedido
-            print("Pedido não encontrado.")
-            
-    # Abre o arquivo pedidos.txt para escrita
-    with open("pedidos.txt", "w") as arquivo_pedidos:
-    # Grava os pedidos restantes no arquivo
-        for linha in conteudo: # Para cada linha no conteúdo do arquivo
-            arquivo_pedidos.write(linha) # Grava a linha no arquivo pedidos.txt
-    
-    if pedido_encontrado == True:
-        print("Pedido apagado com sucesso") # Mensagem de sucesso
+    for i, linha in enumerate(pedidos):
+        id_pedido, _, _, _ = linha.strip().split("|")
+        if id_apagar == int(id_pedido):
+            print(f"Pedido encontrado: {linha.strip()}")
+            # Remove o pedido da lista
+            pedidos.pop(i)
+            salvar_pedidos(pedidos)
+            print("Pedido excluído com sucesso!")
+            return
+        # Se não encontrar o pedido
+    print("Pedido não encontrado.")
     
 
 def avaliar_pedido():
@@ -195,51 +206,32 @@ def avaliar_pedido():
         return
     
 
-    with open("pedidos.txt", 'r') as arquivo_p:
-        conteudo = arquivo_p.readlines()
-
-        pedido_encontrado = False
-
-        for i, linha in enumerate(conteudo):
-            id_pedido, usuario, alimento, avaliacao = linha.split("|")
-            if id_avaliar == int(id_pedido):
-                 print(f"Pedido encontrado: {linha.strip()}")
-                 nova_linha = f"{id_pedido}|{usuario}|{alimento}|{nota}\n"
-                 conteudo[i] = nova_linha
-                 pedido_encontrado = True
-                 break
-
-        if pedido_encontrado:
-            with open("pedidos.txt", "w") as arquivo_p:
-                for linha in conteudo:
-                    arquivo_p.write(linha)
-            
-            print("Pedido avaliado com sucesso! Obrigado por nos avaliar.")
-        else:
-            print("Pedido não encontrado.")
+    pedidos = carregar_pedidos()
+    for i, linha in enumerate(pedidos):
+        id_pedido, usuario, alimento, _ = linha.split("|")
+        if id_avaliar == int(id_pedido):
+            print(f"Pedido encontrado: {linha.strip()}")
+            pedidos[i] = f"{id_pedido}|{usuario}|{alimento}|{nota}\n"
+            salvar_pedidos(pedidos)
+            print("Pedido avaliado com sucesso. Obrigado por nos avaliar.")
+            return
+    print("Pedido não encontrado.")
 
 
-def adicionar_item_pedido(id_pedido, item):
-    try: 
-        with open(arquivo_pedidos, 'r', encoding="utf-8") as arquivo:
-            pedidos = arquivo.readlines()
+# def adicionar_item_pedido(id_pedido, item):
+#     pedidos = carregar_pedidos()
 
-        for i, linha in enumerate(pedidos):
-            id_atual, usuario, alimento, avaliacao = linha.strip().split("|")
-            if int(id_atual) == id_pedido:
-                lista = alimento.split(",") if alimento else []
-                lista.append(item)
-                alimento_atualizado = ",".join(lista)
-                pedidos[i] = f"{id_atual}|{usuario}|{alimento_atualizado}|{avaliacao}\n"
-                break
-            
-        with open(arquivo_pedidos, 'w', encoding="utf-8") as arquivo:
-            for linha in pedidos:
-                arquivo.write(linha)
-
-        print(f"{item} adicionado ao seu pedido com sucesso!")
-    except Exception as e:
-        print(f"Erro ao adicionar item ao pedido: {e}")
+#     for i, linha in enumerate(pedidos):
+#         id_atual, usuario, alimento, avaliacao = linha.strip().split("|")
+#         if int(id_atual) == id_pedido:
+#             lista = alimento.split(",") if alimento else []
+#             lista.append(item)
+#             alimento_atualizado = ",".join(lista)
+#             pedidos[i] = f"{id_atual}|{usuario}|{alimento_atualizado}|{avaliacao}\n"
+#             salvar_pedidos(pedidos)
+#             print(f"{item} adicionado ao seu pedido com sucesso.")
+#             return
+#         print("Pedido não encontrado.")
 
 def buscar_por_codigo(codigo):
     try: 
@@ -284,27 +276,9 @@ def menu_pos_login (usuario_login):
             exibir_cardapio()
             id = criar_pedidos(usuario_login)
             print(f"Pedido criado, o ID do seu pedido é: {id}")
-
-            primeira_vez = True
-            while True:
-                # print(f"[DEBUG] primeira_vez = {primeira_vez}")
-                if primeira_vez:
-                    codigo = input("O que deseja comer hoje? Digite o codigo do item: ").strip()
-                    primeira_vez = False
-                else:
-                    codigo = input("Deseja adicionar outro item ao pedido? Se sim, digite o código do item. Caso contrário, digite 0: ").strip()
-
-
-                if codigo == "0":
-                    print("Pedido finalizado!")
-                    break
-
-                nome_item = buscar_por_codigo(codigo)
-
-                if nome_item:
-                    adicionar_item_pedido(id, nome_item)
-                else:
-                    print("Código não encontrado no cardápio.")
+            print("Agora vamos adicionar os itens ao seu pedido.")
+            atualizar_pedido()  
+            print("Pedido finalizado!")
 
         elif escolha == "2":
             atualizar_pedido()
