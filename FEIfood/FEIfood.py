@@ -6,7 +6,7 @@ separador = "-" * len(nome_projeto)
 cabecalho = separador + "\n" + nome_projeto + "\n" + separador
 
 print(cabecalho)
-print("Seja bem vindo(a) ao FEIfood! É um prazer ter você conosco.")
+print("\nSeja bem vindo(a) ao FEIfood! É um prazer ter você conosco.")
 print()
 
 #arquivos utilizados no projeto 
@@ -88,7 +88,7 @@ def exibir_alimentos(lista):
     for alimento in lista:
         print(f"Nome: {alimento['Nome']}")
         print(f"Categoria: {alimento['Categoria']}")
-        print(f"Preço: {alimento['preco']:.2f}")
+        print(f"Preço: {alimento['Preco']:.2f}")
         print(f"Descrição: {alimento['Descricao']}")
         print("-" * 40)
 
@@ -291,16 +291,31 @@ def menu_pos_pedido(usuario_login, linha_pedido):
         print(f"- Endereço de entrega: {endereco}")
         print(f"\nSeu pedido foi finalizado com sucesso!")
         print("Ele chegará em até 40 minutos. Obriagdo por escolher o FEIfood.")
-        print("\nRetornando ao menu inicial...")
-        menu_inicial()
+        
+
+        #avaliação do pedido
+        avaliar = input("\nDeseja avaliar seu pedido agora? (s/n): ").strip().lower()
+        if avaliar == "s":
+            nota = input("Digite a nota de avaliação (0 a 5): ").strip()
+            while nota not in ["0", "1", "2", "3", "4", "5"]:
+                print("Nota inválida. Digite uma nota entre 0 e 5.")
+                nota = input("Digite a nota de avaliação (0 a 5): ").strip()
+            
+            id_pedido, usuario, alimento, _ = linha_pedido.strip().split("|")
+            linha_pedido_avaliada = f"{id_pedido}|{usuario}|{alimento}|{nota}\n"
+            pedidos = carregar_pedidos()
+            for i, linha in enumerate(pedidos):
+                if linha.startswith(f"{id_pedido}|"):
+                    pedidos[i] = linha_pedido_avaliada
+                    break
+
+            salvar_pedidos(pedidos)
+            print("Obrigado por sua avaliação!")
+        else:
+            print("Não se esqueça de avaliar seu pedido mais tarde!")
     else: 
         menu_pos_login(usuario_login)
         
-    
-
-        
-            
-    
 
 def avaliar_pedido(usuario_login):
     id_avaliar = int(input("Digite o ID do pedido que deseja avaliar: "))
@@ -350,9 +365,9 @@ def buscar_por_codigo(codigo):
     
 def exibir_cardapio():
     try:
+        titulo = "▶ CARDÁPIO COMPLETO "
         with open(arquivo_alimentos, 'r', encoding='utf-8') as arquivo:
-            print("\n CARDÁPIO COMPLETO")
-            print("-" * 40)
+            alimentos = [linha.strip().split("|") for linha in arquivo]
 
             for linha in arquivo:
                 codigo, nome, categoria, preco, descricao = linha.strip().split("|")
@@ -368,11 +383,14 @@ def exibir_cardapio():
 
 def menu_pos_login (usuario_login):
     while True:
-        print("\nO que você deseja fazer hoje?")
+        print("\nO que você deseja fazer hoje?\n")
         print("[1] - Fazer novo pedido")
         print("[2] - Atualizar pedido")
         print("[3] - Excluir pedido")
-        print("[4] - Sair")
+        print("[4] - Avaliar pedido")
+        print("[5] - Buscar alimentos")
+        print("[6] - Sair")
+        print("-" * len("[1] - Fazer novo pedido"))
 
         escolha = input("Digite sua opção: ")
 
@@ -381,25 +399,31 @@ def menu_pos_login (usuario_login):
             id = criar_pedidos(usuario_login)
             print(f"\nPedido criado, o ID do seu pedido é: {id}")
             print("\nAgora vamos adicionar os itens ao seu pedido.")
-            atualizar_pedido()  
+            atualizar_pedido(usuario_login)  
             print("\nPedido finalizado!")
 
         elif escolha == "2":
-            atualizar_pedido()
+            atualizar_pedido(usuario_login)
         elif escolha == "3":
             excluir_pedido()
         elif escolha == "4":
+            avaliar_pedido(usuario_login)
+        elif escolha == "5":
+            alimento_desejado = input("Digite o nome do alimento que deseja buscar: ")
+            resultados = buscar_alimentos(alimento_desejado)
+            exibir_alimentos(resultados)
+        elif escolha == "6":
             print("\nSaindo da guia de pedidos e retornado ao menu inicial...")
             break
         else:
-            print("\nOpção inválida. Digite o que você deseja fazer hoje (0 a 4): ")
+            print("\nOpção inválida. Digite o que você deseja fazer hoje (0 a 6): ")
 
 
 def menu_inicial():
     while True:
 
         #menu
-        print("\nEscolha uma opção:")
+        print("Escolha uma opção:")
         print("[1] - Fazer Login")
         print("[2] - Realizar Cadastro")
         print("[3] - Sair do programa\n")
