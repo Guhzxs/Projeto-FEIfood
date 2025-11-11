@@ -142,14 +142,17 @@ def exibir_pedido_formatado(linha):
     print(f"- Avaliação: {avaliacao}")
     print("-" * 40)
 
-def atualizar_pedido():
+def atualizar_pedido(usuario_login):
     print("Atualizar pedido:")
     id_atualizar = int(input("Digite o ID do pedido que deseja atualizar: "))
     pedidos = carregar_pedidos()
 
     # Procura o pedido no arquivo
     for i, linha in enumerate(pedidos): # Para cada índice e linha no conteúdo do arquivo 
-        id_pedido, usuario, alimento, avaliacao = linha.strip().split("|") # Divide a linha em partes, separando pelo separador 
+        partes = linha.strip().split("|") # Divide a linha em partes, separando pelo separador 
+        if len(partes) != 4:
+            continue
+        id_pedido, usuario, alimento, avaliacao = partes
         if id_atualizar == int(id_pedido): # Verifica se o id procurado é igual ao id_pedido
             # Imprime os dados do pedido encontrado
             exibir_pedido_formatado(linha)
@@ -172,11 +175,13 @@ def atualizar_pedido():
 
             alimento_atualizado = ",".join(lista) # Junta os itens em uma única string
             pedidos[i] = f"{id_pedido}|{usuario}|{alimento_atualizado}|{avaliacao}\n" # Atualiza a linha do pedido
-            salvar_pedidos() 
+            salvar_pedidos(pedidos) 
 
             print("\n Pedido atualizado com sucesso:")
             exibir_pedido_formatado(pedidos[i])
+            menu_pos_pedido(usuario_login, pedidos[i])
             return
+            
     # Se não encontrar o pedido
         print("Pedido não encontrado.") # Mensagem de erro se o pedido não for encontrado
     
@@ -186,19 +191,118 @@ def excluir_pedido():
     pedidos = carregar_pedidos()
         # Procura o pedido no arquivo
     for i, linha in enumerate(pedidos):
-        id_pedido, _, _, _ = linha.strip().split("|")
+        partes = linha.strip().split("|")
+        if len(partes) != 4:
+            continue
+        id_pedido, usuario, alimento, avaliacao = partes
+
         if id_apagar == int(id_pedido):
-            print(f"Pedido encontrado: {linha.strip()}")
-            # Remove o pedido da lista
-            pedidos.pop(i)
-            salvar_pedidos(pedidos)
-            print("Pedido excluído com sucesso!")
-            return
+            print(f"\nPedido encontrado: ")
+            exibir_pedido_formatado(linha)
+
+            resposta = input("\nTem certeza que deseja excluir este pedido? (s/n)")
+            if resposta == "s".upper():
+                # Remove o pedido da lista
+                pedidos.pop(i)
+                salvar_pedidos(pedidos)
+                print("\nPedido excluído com sucesso!")
+                return
+            else:
+                print("\nPedido não foi alterado. Voltando ao menu de funções.")
+                return
         # Se não encontrar o pedido
     print("Pedido não encontrado.")
+
+def excluir_item_pedido(usuario_login):
+    id_alterar = int(input("Digite o ID do pedido que deseja alterar: "))
+    pedidos = carregar_pedidos()
+
+    for i, linha in enumerate(pedidos):
+        partes = linha.strip().split("|")
+        if len(partes) != 4:
+            continue
+        id_pedido, usuario, alimento, avaliacao = partes
+
+        if id_alterar == int(id_pedido):
+            print(f"\nPedido encontrado: ")
+            exibir_pedido_formatado(linha)
+
+            lista = alimento.split(",") if alimento else[]
+            while True:
+                print(f"\nItens do pedido:")
+                for idx, item in enumerate(lista):
+                    print(f"[{idx}] {item}")
+                remover = input("\nDigite o código do item que deseja remover (Ou 0 caso tenha terminado de editar): ")
+                if remover == "0":
+                    break
+                elif remover.isdigit() and int(remover) < len(lista):
+                    item_removido = lista.pop(int(remover))
+                    print(f"\n- {item_removido} removido do pedido {id_pedido}.")
+                else:
+                    print("Índice inválido. Tente novamente.")
+
+            alimento_atualizado = ",".join(lista)
+            pedidos[i] = f"{id_pedido}|{usuario}|{alimento_atualizado}|{avaliacao}\n"
+            salvar_pedidos(pedidos)
+
+            print("\nPedido atualizado após remoção:")
+            exibir_pedido_formatado(pedidos[i])
+            menu_pos_pedido(usuario_login, pedidos[i])
+            return
+
+    print("Pedido não encontrado.")
+
+
+def menu_pos_pedido(usuario_login, linha_pedido):
+
+    print("\nTodas as alterações feitas com sucesso!")
+    print("O que deseja fazer agora? ")
+
+    print("\n[1] -  Finalizar pedido")
+    print("[2] - Voltar ao menu principal\n")
+
+    decisao = int(input("Digite o que deseja fazer: "))
+
+    if decisao == 1:
+        print("\nEscolha a forma de pagamento:")
+        print("[1] - Pix")
+        print("[2] - Cartão de crédito/débito")
+        print("[3] - Dinheiro")
+
+        pagamento = int(input("\nDigite o indice da forma de pagamento desejada: "))
+        if pagamento == 1:
+            print("\nMetódo de pagamento escolhido: [Pix]")
+            forma = "Pix"
+        elif pagamento == 2:
+            print("\nMetódo de pagamento escolhido: [Cartão de crédito/débito]")
+            forma = "Cartão de crédito/débito"
+        else:
+            print("\nMétodo de pagamento escolhido: [Dinheiro]")
+            forma = "Dinheiro"
+
+        endereco = input("\nDigite o endereço para entrega: ").strip()
+        while not endereco:
+            print("Endereço é um campo obrigatório.")
+            endereco = input("Digite o endereço para entrega: ").strip()
+
+        print("Resumo final:")
+        exibir_pedido_formatado(linha_pedido)
+        print(f"\n- Forma de pagamento: {forma}")
+        print(f"- Endereço de entrega: {endereco}")
+        print(f"\nSeu pedido foi finalizado com sucesso!")
+        print("Ele chegará em até 40 minutos. Obriagdo por escolher o FEIfood.")
+        print("\nRetornando ao menu inicial...")
+        menu_inicial()
+    else: 
+        menu_pos_login(usuario_login)
+        
     
 
-def avaliar_pedido():
+        
+            
+    
+
+def avaliar_pedido(usuario_login):
     id_avaliar = int(input("Digite o ID do pedido que deseja avaliar: "))
     nota = input("Digite a nota de avaliação (0 a 5): ").strip()
     if nota not in ["0", "1", "2", "3", "4", "5"]:
@@ -259,82 +363,83 @@ def exibir_cardapio():
                 print(f"Descrição: {descricao}") 
                 print("-" * 40)
     except FileNotFoundError:
-        print("Cardápio não encontrado.")
+        print("\nCardápio não encontrado.")
 
 
 def menu_pos_login (usuario_login):
     while True:
-        print("O que você deseja fazer hoje?")
-        print("[1] Fazer novo pedido")
-        print("[2] Atualizar pedido")
-        print("[3] Excluir pedido")
-        print("[4] Sair")
+        print("\nO que você deseja fazer hoje?")
+        print("[1] - Fazer novo pedido")
+        print("[2] - Atualizar pedido")
+        print("[3] - Excluir pedido")
+        print("[4] - Sair")
 
         escolha = input("Digite sua opção: ")
 
         if escolha == "1":
             exibir_cardapio()
             id = criar_pedidos(usuario_login)
-            print(f"Pedido criado, o ID do seu pedido é: {id}")
-            print("Agora vamos adicionar os itens ao seu pedido.")
+            print(f"\nPedido criado, o ID do seu pedido é: {id}")
+            print("\nAgora vamos adicionar os itens ao seu pedido.")
             atualizar_pedido()  
-            print("Pedido finalizado!")
+            print("\nPedido finalizado!")
 
         elif escolha == "2":
             atualizar_pedido()
         elif escolha == "3":
             excluir_pedido()
         elif escolha == "4":
-            print("Saindo da guia de pedidos e retornado ao menu inicial...")
+            print("\nSaindo da guia de pedidos e retornado ao menu inicial...")
             break
         else:
-            print("Opção inválida. Digite o que você deseja fazer hoje (0 a 4): ")
+            print("\nOpção inválida. Digite o que você deseja fazer hoje (0 a 4): ")
 
 
+def menu_inicial():
+    while True:
 
-while True:
+        #menu
+        print("\nEscolha uma opção:")
+        print("[1] - Fazer Login")
+        print("[2] - Realizar Cadastro")
+        print("[3] - Sair do programa\n")
+        try:
+            opcao = int(input("Digite sua opção: "))
+        except ValueError:
+            error_msg = "Opção inválida! Digite as opções do menu (1, 2 ou 3)."
+            print(error_msg)
+            continue
+        if opcao == 1:
+            
+            usuario_login = input("Nome de usuário: ")
+            senha_login = input("Digite sua senha: ")
 
-    #menu
-    print("Escolha uma opção:")
-    print("[1] - Fazer Login")
-    print("[2] - Realizar Cadastro")
-    print("[3] - Sair do programa")
-    try:
-        opcao = int(input("Digite sua opção: "))
-    except ValueError:
-        error_msg = "Opção inválida! Digite as opções do menu (1, 2 ou 3)."
-        print(error_msg)
-        continue
-    if opcao == 1:
+            if verifica_login(usuario_login,senha_login):
+                print(f"\nLogin bem sucedido! Que bom te ver novamente {usuario_login}.")
+                menu_pos_login(usuario_login)
+
+            else:
+                print("\nNome de usuário ou senha incorretos. Tente novamente.")
+        elif opcao == 2:
+        #cadastro
+            usuario = {
+                "Nome de usuário": "",
+                "CPF": "",
+                "Data de Nascimento": "",
+                "Senha": ""
+            }
+
+            print("Digite os campos abaixo para realizar o seu cadastro:")
+            for chave in usuario:
+                usuario[chave] = input(chave + ": ")
         
-        usuario_login = input("Nome de usuário: ")
-        senha_login = input("Digite sua senha: ")
-
-        if verifica_login(usuario_login,senha_login):
-            print(f"Login bem sucedido! Que bom te ver novamente {usuario_login}.")
-            menu_pos_login(usuario_login)
-
+            salvar_cadastro(usuario)
+            print("Cadastro realizado com sucesso! Faça login.")
+        elif opcao == 3:
+            print("Obrigado(a) por usar o FEIfood. Até a próxima!")
+            break
         else:
-            print("Nome de usuário ou senha incorretos. Tente novamente.")
-    elif opcao == 2:
-    #cadastro
-        usuario = {
-            "Nome de usuário": "",
-            "CPF": "",
-            "Data de Nascimento": "",
-            "Senha": ""
-        }
-
-        print("Digite os campos abaixo para realizar o seu cadastro:")
-        for chave in usuario:
-            usuario[chave] = input(chave + ": ")
-    
-        salvar_cadastro(usuario)
-        print("Cadastro realizado com sucesso! Faça login.")
-    elif opcao == 3:
-        print("Obrigado(a) por usar o FEIfood. Até a próxima!")
-        break
-    else:
-        print(error_msg)
+            print(error_msg)
 
 
+menu_inicial()

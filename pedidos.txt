@@ -1,6 +1,6 @@
 1001|andre||-
 1002|andre|Nhoque ao Sugo,Pizza Margherita|-
-1003|andre|Pizza Margherita,Nhoque ao Sugo|-
+1003|andre|Pizza Margherita,Nhoque ao Sugo,Ravioli de Ricota e Espinafre,Panna Cotta,Lasanha � Bolonhesa|-
 1004|andre|Tiramisu,Nhoque ao Sugo,Ravioli de Ricota e Espinafre,Tiramisu,Pizza Margherita,Pizza Quatro Queijos|-
 1005|andre|Pizza Margherita,06,Ravioli de Ricota e Espinafre|-
 1006|andre|Tiramisu,Nhoque ao Sugo,Pizza Quatro Queijos|-
