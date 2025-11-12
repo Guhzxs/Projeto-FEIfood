@@ -8,3 +8,6 @@
 08|Bruschetta|Entrada|18.00|Pão italiano com tomate, alho, azeite e manjericão
 09|Tiramisu|Sobremesa|22.00|Sobremesa italiana com café, creme de mascarpone e cacau
 10|Panna Cotta|Sobremesa|19.50|Creme cozido com baunilha e calda de frutas vermelhas
+11|Água Mineral|Bebidas|5.00|Garrafa de água mineral sem gás
+12|Refrigerante|Bebidas|7.50|Lata de refrigerante gelado (Coca-Cola, Guaraná ou similar)
+13|Suco Natural|Bebidas|9.90|Suco de frutas naturais (laranja, limão ou maracujá)
