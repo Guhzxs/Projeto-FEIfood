@@ -1,2 +1,3 @@
-21001|Gusta|Refrigerante,Nhoque ao Sugo,Pizza Margherita,Água Mineral|4
-1002|Gusta|Suco Natural,Nhoque ao Sugo,Fettuccine Alfredo,Ravioli de Ricota e Espinafre,Água Mineral|-
+1002|Gusta|Suco Natural,Nhoque ao Sugo,Ravioli de Ricota e Espinafre,Água Mineral,Refrigerante,Suco Natural,Tiramisu,Suco Natural|5
+21002|Rayane|Lasanha à Bolonhesa,Refrigerante|5
+21003|Rayane||-

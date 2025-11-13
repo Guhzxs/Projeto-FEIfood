@@ -125,20 +125,25 @@ def exibir_cardapio():
     if not alimentos:
         print("\nCardápio não encontrado.")
         return
+
     titulo = "▶ CARDÁPIO COMPLETO "
-    linhas_formatadas = [
-        f"{a['Código']:<8} | {a['Nome']:<35} | {a['Categoria']:<15} | R${a['Preco']:7.2f} | {a['Descricao']}"
-        for a in alimentos
-    ]
-    largura = max(len(l) for l in linhas_formatadas)
-    print("=" * largura)
-    print(titulo.center(largura))
-    print("=" * largura)
-    print(f"{'Código':<8} | {'Nome':<35} | {'Categoria':<15} | {'Preço':<10} | {'Descrição'}")
-    print("-" * largura)
-    for linha in linhas_formatadas:
-        print(linha)
-    print("=" * largura)
+    largura_total = 137 # largura fixa da tabela
+
+    print("=" * largura_total)
+    print(titulo.center(largura_total))
+    print("=" * largura_total)
+
+    # Cabeçalho com larguras fixas
+    cabecalho = f"{'Código':<6} | {'Nome':<30} | {'Categoria':<12} | {'Preço':<8} | {'Descrição'}"
+    print(cabecalho.ljust(largura_total))
+    print("-" * largura_total)
+
+    # Linhas
+    for a in alimentos:
+        linha = f"{a['Código']:<6} | {a['Nome']:<30} | {a['Categoria']:<12} | R${a['Preco']:6.2f} | {a['Descricao']}"
+        print(linha.ljust(largura_total))
+
+    print("=" * largura_total)
 
 # ==========================
 # PEDIDOS
@@ -203,7 +208,8 @@ def exibir_pedido_formatado(linha):
 def editar_itens_pedido(pedido):
     """Permite adicionar ou remover itens de um pedido."""
     while True:
-        print("\n[1] Adicionar item\n[2] Remover item\n[0] Finalizar edição")
+        print("O que deseja fazer hoje?")
+        print("\n[1] - Adicionar item\n[2] - Remover item\n[0] - Finalizar edição\n")
         escolha = input("Digite sua opção: ")
         if escolha == "0":
             break
@@ -222,8 +228,13 @@ def editar_itens_pedido(pedido):
             if not pedido["itens"]:
                 print("Nenhum item para remover.")
                 continue
+
+            print("\nItens no carrinho:")
+            print("=" * 40)
             for idx, item in enumerate(pedido["itens"]):
-                print(f"[{idx}] {item}")
+                print(f"\n[{idx}] {item}")
+            print("=" * 40)
+
             remover = input("Índice do item (ou 0 para cancelar): ")
             if remover == "0":
                 continue
@@ -233,7 +244,7 @@ def editar_itens_pedido(pedido):
             else:
                 print("Índice inválido.")
         else:
-            print("Opção inválida.")
+            print("Opção inválida. Digite 1, 2 ou 0.")
 
 def atualizar_pedido(usuario_login):
     """Atualiza um pedido existente (adicionar/remover itens)."""
@@ -248,6 +259,7 @@ def atualizar_pedido(usuario_login):
             salvar_pedidos(pedidos)
             print("\nPedido atualizado com sucesso!")
             exibir_pedido_formatado(pedidos[i])
+            menu_pos_pedido(usuario_login, pedidos[i])
             return
     print("Pedido não encontrado.")
 
@@ -294,86 +306,95 @@ def menu_pos_pedido(usuario_login, linha_pedido):
     print("\nTodos os itens adicionados com sucesso!")
     print("O que deseja fazer agora? ")
 
-    print("\n[1] - Finalizar pedido")
-    print("[2] - Voltar ao menu principal\n")
+    while True:
+        print("\n[1] - Finalizar pedido")
+        print("[2] - Voltar ao menu principal\n")
 
-    decisao = input("Digite sua opção: ")
+        decisao = input("Digite sua opção: ")
 
-    if decisao == "1":
-        print("\nEscolha a forma de pagamento:\n")
-        print("[1] - Pix")
-        print("[2] - Cartão de crédito/débito")
-        print("[3] - Dinheiro")
+        if decisao == "1":
+            print("\nEscolha a forma de pagamento:\n")
+            print("[1] - Pix")
+            print("[2] - Cartão de crédito/débito")
+            print("[3] - Dinheiro")
 
-        pagamento = input("\nDigite o índice da forma de pagamento desejada: ")
-        if pagamento == "1":
-            forma = "Pix"
-        elif pagamento == "2":
-            forma = "Cartão de crédito/débito"
-        else:
-            forma = "Dinheiro"
+            pagamento = input("\nDigite o índice da forma de pagamento desejada: ")
+            if pagamento == "1":
+                forma = "Pix"
+            elif pagamento == "2":
+                forma = "Cartão de crédito/débito"
+            else:
+                forma = "Dinheiro"
 
-        endereco = input("\nDigite o endereço para entrega: ").strip()
-        while not endereco:
-            print("Endereço é um campo obrigatório.")
-            endereco = input("Digite o endereço para entrega: ").strip()
+            endereco = input("\nDigite o endereço para entrega: ").strip()
+            while not endereco:
+                print("Endereço é um campo obrigatório.")
+                endereco = input("Digite o endereço para entrega: ").strip()
 
-        largura = 70
-        titulo = "RESUMO FINAL DO PEDIDO"
+            largura = 70
+            titulo = "RESUMO FINAL DO PEDIDO"
 
-        print("\n" + "=" * largura)
-        print(titulo.center(largura))
-        print("=" * largura)
+            print("\n" + "=" * largura)
+            print(titulo.center(largura))
+            print("=" * largura)
 
-        # Exibe os dados do pedido formatados
-        id_pedido, usuario, alimento, avaliacao = linha_pedido.strip().split("|")
+            # Exibe os dados do pedido formatados
+            id_pedido, usuario, alimento, avaliacao = linha_pedido.strip().split("|")
 
-        print(f"\nID do Pedido : {id_pedido}")
-        print(f"Usuário      : {usuario}")
-        print("-" * largura)
-        print("Carrinho atual:")
+            print(f"ID do Pedido : {id_pedido}")
+            print(f"Usuário      : {usuario}")
+            print("-" * largura)
+            print("Carrinho atual:")
 
-        itens = alimento.split(",") if alimento else []
-        if itens and itens[0]:
-            for item in itens:
-                print(f"  • {item}")
-        else:
-            print("  (Nenhum item no carrinho)")
+            itens = alimento.split(",") if alimento else []
+            if itens and itens[0]:
+                for item in itens:
+                    print(f"  • {item}")
+            else:
+                print("  (Nenhum item no carrinho)")
 
-        print("-" * largura)
-        print(f"Avaliação    : {avaliacao}")
-        print("-" * largura)
-        print(f"Forma de pagamento : {forma}")
-        print(f"Endereço de entrega: {endereco}")
-        print("=" * largura)
+            print("-" * largura)
+            print(f"Avaliação    : {avaliacao}")
+            print("-" * largura)
+            print(f"Forma de pagamento : {forma}")
+            print(f"Endereço de entrega: {endereco}")
+            print("=" * largura)
 
-        print("\nSeu pedido foi finalizado com sucesso!")
-        print("Ele chegará em até 40 minutos.")
-        print("\nObrigado por escolher o FEIfood.")
-        print("=" * largura)
+            print("\nSeu pedido foi finalizado com sucesso!")
+            print("Ele chegará em até 40 minutos.")
+            print("\nObrigado por escolher o FEIfood.")
+            print("=" * largura)
 
-        # avaliação do pedido
-        avaliar = input("\nDeseja avaliar seu pedido agora? (s/n): ").strip().lower()
-        if avaliar == "s":
-            nota = input("Digite a nota de avaliação (0 a 5): ").strip()
-            while nota not in ["0", "1", "2", "3", "4", "5"]:
-                print("Nota inválida. Digite uma nota entre 0 e 5.")
+            # avaliação do pedido
+            avaliar = input("\nDeseja avaliar seu pedido agora? (s/n): ").strip().lower()
+            if avaliar == "s":
                 nota = input("Digite a nota de avaliação (0 a 5): ").strip()
+                while nota not in ["0", "1", "2", "3", "4", "5"]:
+                    print("Nota inválida. Digite uma nota entre 0 e 5.")
+                    nota = input("Digite a nota de avaliação (0 a 5): ").strip()
 
-            id_pedido, usuario, alimento, _ = linha_pedido.strip().split("|")
-            linha_pedido_avaliada = f"{id_pedido}|{usuario}|{alimento}|{nota}\n"
-            pedidos = carregar_pedidos()
-            for i, linha in enumerate(pedidos):
-                if linha.startswith(f"{id_pedido}|"):
-                    pedidos[i] = linha_pedido_avaliada
-                    break
+                id_pedido, usuario, alimento, _ = linha_pedido.strip().split("|")
+                linha_pedido_avaliada = f"{id_pedido}|{usuario}|{alimento}|{nota}\n"
+                pedidos = carregar_pedidos()
+                for i, linha in enumerate(pedidos):
+                    if linha.startswith(f"{id_pedido}|"):
+                        pedidos[i] = linha_pedido_avaliada
+                        break
 
-            salvar_pedidos(pedidos)
-            print("Obrigado por sua avaliação! Retornando ao menu inicial...")
+                salvar_pedidos(pedidos)
+                print("Obrigado por sua avaliação! Retornando ao menu inicial...")
+            
+            elif avaliar == "n":
+                print("Não esqueça de avaliar seu pedido mais tarde!")
+                break
+
+            else:
+                print("Opção inválida! Digite apenas 's' para sim ou 'n' para não.")
+        elif decisao == "2":
+            return
         else:
-            print("Não se esqueça de avaliar seu pedido mais tarde!")
-    else:
-        menu_pos_login(usuario_login)
+            print("Opção inválida! Digite 1 ou 2.")
+        
 
 
 def novo_pedido(usuario_login):
@@ -421,7 +442,7 @@ def exibir_menu(titulo, opcoes):
     print(titulo.center(largura))
     print("=" * largura)
     for chave, texto in opcoes.items():
-        print(f"| [{chave}] - {texto.ljust(largura-8)} |")
+        print(f"| [{chave}] - {texto.ljust(largura-9)}|")
     print("=" * largura)
 
 def menu_pos_login(usuario_login):
@@ -445,13 +466,17 @@ def menu_pos_login(usuario_login):
     while True:
         exibir_menu("MENU PÓS-LOGIN", opcoes)
         escolha = input("Digite sua opção: ")
-        funcao = funcoes.get(escolha)
-        if funcao:
-            funcao()
-            if escolha == "6":
+
+        if escolha == "6":
+                funcoes["6"]()
                 break
         else:
-            print("Opção inválida! Digite de 1 a 6.")
+
+            funcao = funcoes.get(escolha)
+            if funcao:
+                funcao()
+            else:
+                print("Opção inválida! Digite de 1 a 6.")
 
 def fazer_login():
     """Realiza login do usuário."""
