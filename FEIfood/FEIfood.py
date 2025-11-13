@@ -97,7 +97,7 @@ def exibir_alimentos(lista):
     if not lista:
         print("Nenhum alimento encontrado")
         return
-    largura = 70
+    largura = 75
     titulo = "RESULTADOS DA BUSCA"
     print("\n" + "=" * largura)
     print(titulo.center(largura))
@@ -207,6 +207,7 @@ def exibir_pedido_formatado(linha):
 
 def editar_itens_pedido(pedido):
     """Permite adicionar ou remover itens de um pedido."""
+    cardapio_exibido = False #flag para controlar a exibição do cardápio
     while True:
         print("O que deseja fazer hoje?")
         print("\n[1] - Adicionar item\n[2] - Remover item\n[0] - Finalizar edição\n")
@@ -214,14 +215,18 @@ def editar_itens_pedido(pedido):
         if escolha == "0":
             break
         elif escolha == "1":
-            exibir_cardapio()
-            codigo = input("Código do item (ou 0 para cancelar): ")
+            if not cardapio_exibido:   
+                print("\n" + "." * 137 + "\n")  # separador visual pois estava bugando meu terminal 
+                exibir_cardapio()
+                cardapio_exibido = True
+
+            codigo = input("Digite o código do item (ou 0 para cancelar): ")
             if codigo == "0": 
                 continue
             alimento = buscar_por_codigo(codigo)
             if alimento:
                 pedido["itens"].append(alimento)
-                print(f"- {alimento} adicionado.")
+                print(f"\n- {alimento} adicionado ao carrinho.")
             else:
                 print("Código inválido.")
         elif escolha == "2":
@@ -235,7 +240,7 @@ def editar_itens_pedido(pedido):
                 print(f"\n[{idx}] {item}")
             print("=" * 40)
 
-            remover = input("Índice do item (ou 0 para cancelar): ")
+            remover = input("Digite o índice do item (ou 0 para cancelar): ")
             if remover == "0":
                 continue
             elif remover.isdigit() and int(remover) < len(pedido["itens"]):
@@ -383,6 +388,7 @@ def menu_pos_pedido(usuario_login, linha_pedido):
 
                 salvar_pedidos(pedidos)
                 print("Obrigado por sua avaliação! Retornando ao menu inicial...")
+                return menu_inicial()
             
             elif avaliar == "n":
                 print("Não esqueça de avaliar seu pedido mais tarde!")
@@ -464,7 +470,7 @@ def menu_pos_login(usuario_login):
         "6": lambda: print("\nSaindo da guia de pedidos e retornando ao menu inicial...")
     }
     while True:
-        exibir_menu("MENU PÓS-LOGIN", opcoes)
+        exibir_menu("MENU PRINCIPAL", opcoes)
         escolha = input("Digite sua opção: ")
 
         if escolha == "6":
@@ -493,7 +499,7 @@ def realizar_cadastro():
     usuario = {
         "Nome de usuário": input("Nome de usuário: "),
         "CPF": input("CPF: "),
-        "Data de Nascimento(00/00/0000)": input("Data de Nascimento: "),
+        "Data de Nascimento": input("Data de Nascimento(00/00/0000): "),
         "Senha": input("Senha: ")
     }
     salvar_cadastro(usuario)
