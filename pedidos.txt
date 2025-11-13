@@ -1,2 +1,2 @@
-1001|gusta|Nhoque ao Sugo,Suco Natural,Pizza Quatro Queijos|5
-1002|gusta|Suco Natural,Pizza Margherita,Nhoque ao Sugo,Fettuccine Alfredo,Água Mineral|4
+21001|Gusta|Refrigerante,Nhoque ao Sugo,Pizza Margherita,Água Mineral|4
+1002|Gusta|Suco Natural,Nhoque ao Sugo,Fettuccine Alfredo,Ravioli de Ricota e Espinafre,Água Mineral|-
